@@ -16,10 +16,10 @@ conn = httplib.HTTPSConnection("dev.sighthoundapi.com",
 #image_data = "https://dev.sighthoundapi.com/v1/detections?type=face,person&faceOption=landmark,gender"
 
 # To use a local file uncomment the following line and update the path
-#image_data = base64.b64encode(open("/path/to/local/image.jpg", "rb").read()).decode()
+image_data = base64.b64encode(open("./testImage.JPG", "rb").read()).decode()
 
 params = json.dumps({"image": image_data})
-conn.request("POST", "/v1/detections?type=face,person&faceOption=landmark,gender", params, headers)
+conn.request("POST", "/v1/recognition?objectType=licenseplate", params, headers)
 response = conn.getresponse()
 result = response.read()
 print("Detection Results = " + str(result))
