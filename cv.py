@@ -23,4 +23,7 @@ conn.request("POST", "/v1/recognition?objectType=licenseplate", params, headers)
 response = conn.getresponse()
 result = response.read()
 print("Detection Results = " + str(result))
+print(name)
+
+
 
