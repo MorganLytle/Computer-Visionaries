@@ -3,7 +3,7 @@ import json
 import os
 import ssl
 
-def main():
+def apiCall():
 
   try:
        import httplib  # Python 2
@@ -36,5 +36,9 @@ def main():
   #return apiResultstr(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['name'])
   return licensePlate
   
+def main():
+  apiCall()
+
 if __name__ == "__main__":
-  main() 
+  main()
+   
