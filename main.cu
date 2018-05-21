@@ -29,7 +29,6 @@ int seed = 1;
 srand(seed);
 int M = 35;
 
-
 A_col = 7;
 A_row = 100;
 A_sz = A_row*A_col;
