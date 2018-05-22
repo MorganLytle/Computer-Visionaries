@@ -14,3 +14,13 @@ for y in range(0,99):
 	Array.append(String)
 	String = ""
 print(Array)
+
+
+
+#calling license plate
+def getLic():
+	import cv
+	licPlate = cv.apiCall()
+
+
+print getLic()
