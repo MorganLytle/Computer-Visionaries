@@ -12,6 +12,7 @@ for y in range(0,99):
 		RandChar = M[RandIndex]
 		String = String+RandChar
 	#put the string in an array 
-	Array[y].append(string)
+	Array.append(String)
+	String = ""
 #print(String)
 print(Array)
