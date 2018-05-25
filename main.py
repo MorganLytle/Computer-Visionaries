@@ -15,12 +15,17 @@ for y in range(0,99):
 	#put the string in an array 
 	Array.append(String)
 	String = ""
-print(Array)
-
+#print(Array)
 
 #calling license plate
 import cv
 licPlate = cv.apiCall()
 def getLic(licPlate):
-	print (licPlate)
+#	print (licPlate)
 	return licPlate
+
+#hardcode test license plate
+i = random.randint(0,99)
+Array[i] = licPlate
+#print(i)
+print(Array)
