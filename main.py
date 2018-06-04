@@ -10,7 +10,7 @@ import decimal
 M = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
 'H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
-Database_Size = 100
+Database_Size = 100000
 String = ""
 Array_List = [] #initialize list for cpu implementation 
                 #list use for cpu for alphabetizing to optimize search
@@ -37,52 +37,55 @@ print("-----------------------------------\n")
 def getLic(licPlate):
 #	print (licPlate)
 	return licPlate
+def cpuSearch(licPlate): 
 
-print("CPU implementation\n")
-#hardcode test license plate
-hardCodedLocation = random.randint(0, Database_Size - 1)
-Array_List[hardCodedLocation] = licPlate
-Lic_Plate_Array = list(licPlate)
-print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
-#print(Array_List)
+  print("CPU implementation\n")
+  #hardcode test license plate
+  hardCodedLocation = random.randint(0, Database_Size - 1)
+  Array_List[hardCodedLocation] = licPlate
+  Lic_Plate_Array = list(licPlate)
+  print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
+  #print(Array_List)
 
-foundLocation = Database_Size+1 #value if plate not in database
+  foundLocation = Database_Size+1 #value if plate not in database
 
-print("\nUnsorted List\n")
+  print("\nUnsorted List\n")
 
-startTime = time.clock()
-for row in range(0, (Database_Size - 1)):
-  if(Array_List[row]==licPlate):
-    foundLocation = row
-    break
-if(foundLocation > Database_Size):
-  print("\nLicense plate not found in unsorted database\n")
-else:
-  print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
-unsortedRuntime = float(time.clock()-startTime) 
-print("Time used to find license plate in unsorted list: ")
-print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
+  startTime = time.clock()
+  for row in range(0, (Database_Size - 1)):
+    if(Array_List[row]==licPlate):
+      foundLocation = row
+      break
+  if(foundLocation > Database_Size):
+    print("\nLicense plate not found in unsorted database\n")
+  else:
+    print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
+  unsortedRuntime = float(time.clock()-startTime) 
+  print("Time used to find license plate in unsorted list: ")
+  print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
 
-#create sorted list
-Array_List_Sorted = sorted(Array_List)
+  #create sorted list
+  Array_List_Sorted = sorted(Array_List)
 
-print("\nSorted List\n")
-#print(Array_List_Sorted)
+  print("\nSorted List\n")
+  #print(Array_List_Sorted)
 
-foundLocation = Database_Size + 1 #value if plate not in database
-startTime = time.clock()
-for row in range(0, (Database_Size - 1)):
-  if(Array_List_Sorted[row]==licPlate):
-    foundLocation = row
-    break 
+  foundLocation = Database_Size + 1 #value if plate not in database
+  startTime = time.clock()
+  for row in range(0, (Database_Size - 1)):
+    if(Array_List_Sorted[row]==licPlate):
+      foundLocation = row
+      break 
 
-if(foundLocation > Database_Size):
-  print("\nLicense plate not found in sorted database\n")  
-else:
-  print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
-sortedRuntime = float(time.clock() - startTime)
-print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
-print("-----------------------------------\n")
+  if(foundLocation > Database_Size):
+    print("\nLicense plate not found in sorted database\n")  
+  else:
+    print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
+  sortedRuntime = float(time.clock() - startTime)
+  print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
+  print("-----------------------------------\n")
+
+cpuSearch(licPlate)
 
 #cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
 
