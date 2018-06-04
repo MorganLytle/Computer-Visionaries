@@ -30,7 +30,7 @@ def apiCall():
   #print("Detection Results = " + str(result) + "\n\n\n")
 
   apiResult = json.loads(str(result))#converts json to a dictionary
-  #print(json.dumps(apiResult, indent = 2)+ "\n\n\n") #prints api data
+  print(json.dumps(apiResult, indent = 2)+ "\n\n\n") #prints api data
   licensePlate = str(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['name'])
   print(licensePlate) #prints license plate number
   #return apiResultstr(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['name'])
