@@ -10,6 +10,8 @@ import decimal
 M = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
 'H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
+regions = [] #FIXME: Make an array of regions
+
 Database_Size = 100000
 String = ""
 Array_List = [] #initialize list for cpu implementation 
@@ -19,6 +21,14 @@ Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to
 Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
 Num_Digits = int(Database_Size * 7)
 
+class dataBase:
+	def __init__(test, licPlate, reg, name, present, wanted):
+		test.licPlate = licPlate
+		test.reg = reg
+		test.name = name
+		test.present = present
+		test.wanted = wanted
+
 for y in range(0,(Database_Size - 1)):
 	#create random license plate
 	for x in range(0,7):
@@ -26,7 +36,9 @@ for y in range(0,(Database_Size - 1)):
 		RandChar = M[RandIndex]
 		String = String+RandChar
                 Array_H[y][x] = RandChar
-	
+	#FIXME: assign string to array of class
+	#FIXME: randomly fill names
+	#FIXME: fill present and wanted vars 0 or 1 		
 	Array_List.append(String) #put the string at the end of the list 
 	String = ""
 
@@ -85,7 +97,6 @@ def cpuSearch(licPlate):
 	print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
 	print("-----------------------------------\n")
 
-cpuSearch(licPlate)
 
 #cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
 
@@ -146,7 +157,9 @@ cpuSearch(licPlate)
 	#else: 
 		#print(licensePlateIndex_h)
     
-    
-
+def main():
+	cpuSearch(licPlate)	 
+if __name__ == "__main__":
+	main()
  
 
