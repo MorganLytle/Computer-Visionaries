@@ -39,51 +39,51 @@ def getLic(licPlate):
 	return licPlate
 def cpuSearch(licPlate): 
 
-  print("CPU implementation\n")
-  #hardcode test license plate
-  hardCodedLocation = random.randint(0, Database_Size - 1)
-  Array_List[hardCodedLocation] = licPlate
-  Lic_Plate_Array = list(licPlate)
-  print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
-  #print(Array_List)
+	print("CPU implementation\n")
+	#hardcode test license plate
+	hardCodedLocation = random.randint(0, Database_Size - 1)
+	Array_List[hardCodedLocation] = licPlate
+	Lic_Plate_Array = list(licPlate)
+	print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
+	#print(Array_List)
 
-  foundLocation = Database_Size+1 #value if plate not in database
+	foundLocation = Database_Size+1 #value if plate not in database
 
-  print("\nUnsorted List\n")
+	print("\nUnsorted List\n")
 
-  startTime = time.clock()
-  for row in range(0, (Database_Size - 1)):
-    if(Array_List[row]==licPlate):
-      foundLocation = row
-      break
-  if(foundLocation > Database_Size):
-    print("\nLicense plate not found in unsorted database\n")
-  else:
-    print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
-  unsortedRuntime = float(time.clock()-startTime) 
-  print("Time used to find license plate in unsorted list: ")
-  print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
+	startTime = time.clock()
+	for row in range(0, (Database_Size - 1)):
+		if(Array_List[row]==licPlate):
+			foundLocation = row
+			break
+	if(foundLocation > Database_Size):
+		print("\nLicense plate not found in unsorted database\n")
+	else:
+		print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
+	unsortedRuntime = float(time.clock()-startTime) 
+	print("Time used to find license plate in unsorted list: ")
+	print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
 
-  #create sorted list
-  Array_List_Sorted = sorted(Array_List)
+	#create sorted list
+	Array_List_Sorted = sorted(Array_List)
 
-  print("\nSorted List\n")
-  #print(Array_List_Sorted)
+	print("\nSorted List\n")
+	#print(Array_List_Sorted)
 
-  foundLocation = Database_Size + 1 #value if plate not in database
-  startTime = time.clock()
-  for row in range(0, (Database_Size - 1)):
-    if(Array_List_Sorted[row]==licPlate):
-      foundLocation = row
-      break 
+	foundLocation = Database_Size + 1 #value if plate not in database
+	startTime = time.clock()
+	for row in range(0, (Database_Size - 1)):
+		if(Array_List_Sorted[row]==licPlate):
+			foundLocation = row
+			break 
 
-  if(foundLocation > Database_Size):
-    print("\nLicense plate not found in sorted database\n")  
-  else:
-    print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
-  sortedRuntime = float(time.clock() - startTime)
-  print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
-  print("-----------------------------------\n")
+	if(foundLocation > Database_Size):
+		print("\nLicense plate not found in sorted database\n")  
+	else:
+		print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
+	sortedRuntime = float(time.clock() - startTime)
+	print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
+	print("-----------------------------------\n")
 
 cpuSearch(licPlate)
 
@@ -91,45 +91,45 @@ cpuSearch(licPlate)
 
 #cuda kernel python wrapper
 #mod = SourceModule("""
-#  __global__ void listSearch(char Array_GPU, int32 Num_Digit, char licPlate){ // FIXME FIX PARAMETERS
- # __shared__ float currentRow[7];
+	#__global__ void listSearch(char Array_GPU, int32 Num_Digit, char licPlate){ // FIXME FIX PARAMETERS
+	#__shared__ float currentRow[7];
   
- # int Row = blockIdx.y * blockDim.y + threadIdx.y;
- # int Col=0;
- # int matchedChar = 0;
+	#int Row = blockIdx.y * blockDim.y + threadIdx.y;
+	#int Col=0;
+	#int matchedChar = 0;
   
- # for(int y = 0; y < 7; ++y) //put current row into shared memory
- # {
- #   currentRow[y] = Array_GPU[Row][y];
- # }
- # __syncthreads();
+	#for(int y = 0; y < 7; ++y) //put current row into shared memory
+	#{
+		#currentRow[y] = Array_GPU[Row][y];
+	#}
+	#__syncthreads();
     
- # while(Col < 7) //search current row to match with the licPlate
- # {
- #   if(currentRow[Col] == licPlate[Col])
- #   {
- #     ++matchedChar;
- #   }
+	#while(Col < 7) //search current row to match with the licPlate
+	#{
+		#if(currentRow[Col] == licPlate[Col])
+		#{
+			#++matchedChar;
+		#}
     
- #   else
- #   {
- #     matchedChar = 0;
- #     y = 0;
- #     break;
- #   }
- #   ++y;
- # }
- # if(matchedChar == 7)
- # {
- #   licensePlateIndex_d = Row
- # }
- # else
- # {
- #   licensePlateIndex_d = Database_Size + 1; //not found
- # }
- # __syncthreads();
- # }
- # """) 
+		#else
+		#{
+			#matchedChar = 0;
+			#y = 0;
+			#break;
+		#}
+		#++y;
+	#}
+	#if(matchedChar == 7)
+	#{
+		#licensePlateIndex_d = Row
+	#}
+	#else
+	#{
+		#licensePlateIndex_d = Database_Size + 1; //not found
+	#}
+	#__syncthreads();
+	#}
+	#""") 
   
 #grid = (,) #FIXME ADD GRID DIMENSIONS
 #block = (,,) #FIXME ADD BLOCK DIMENSIONS
@@ -141,10 +141,10 @@ cpuSearch(licPlate)
 #cuda.memcpy_dtoh(licensePlateIndex_h, licensePlateIndex_d) #returns location of license plate
 
 #if (licensePlateIndex_h >= Database_Size):
- # print("License Plate not in database. \n")
+	#print("License Plate not in database. \n")
   
-  #else: 
-   # print(licensePlateIndex_h)
+	#else: 
+		#print(licensePlateIndex_h)
     
     
 
