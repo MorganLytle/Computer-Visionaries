@@ -10,7 +10,23 @@ import decimal
 M = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
 'H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
-regions = [] #FIXME: Make an array of regions
+regions = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut',
+'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
+'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
+'North Carolina', 'North Dakota', 'Ohio, Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+'West Virginia', 'Wisconsin', 'Wyoming', 'Canada'] #FIXME: Make an array of regions
+
+firstNames = ['Jenn', 'Janis', 'Jasmine', 'Jessica', 'Zoey',
+'Bob', 'Captain', 'Sam', 'Morgan', 'Kevin', 'Tsz',
+'Daniel', 'Richard', 'Kermit', 'Justin', 'Uriel',
+'Caroline', 'Calvin', 'Nick', 'Ahri', 'POOP']
+
+lastNames = ['Thagreat', 'Wong', 'Lam', 'Choi', 'Theboss',
+'Thefrog', 'Lilwayne', 'Falcon', 'Ike', 'Vert'
+'Marth', 'Fox', 'Marvel', 'Waconda', 'Uzi',
+'Mario', 'Luigi', 'Cashmioutsyd', 'Howbowdat', 'Korotkov', 'SCOOP']
 
 Database_Size = 100000
 String = ""
@@ -20,6 +36,7 @@ Array_List_Sorted = []
 Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to GPU
 Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
 Num_Digits = int(Database_Size * 7)
+databaseClasses = []
 
 class dataBase:
 	def __init__(test, licPlate, reg, name, present, wanted):
@@ -36,6 +53,17 @@ for y in range(0,(Database_Size - 1)):
 		RandChar = M[RandIndex]
 		String = String+RandChar
                 Array_H[y][x] = RandChar
+	
+	RandRegion = regions[random.randint(0,49)]
+	RandName = firstNames[random.randint(0,19)] + ' ' + lastNames[random.randint(0,19)]
+	RandPres = random.choice([0,1])
+	RandWanted = random.choice([0, 1])
+	
+	g = dataBase(String, RandRegion, RandName, RandPres, RandWanted)
+	databaseClasses.append(g)	
+	
+	#databaseClasses[y] = dataBase.append(String, RandRegion, RandName, RandPres, RandWanted)
+
 	#FIXME: assign string to array of class
 	#FIXME: randomly fill names
 	#FIXME: fill present and wanted vars 0 or 1 		
@@ -55,7 +83,7 @@ def cpuSearch(licPlate):
 	#hardcode test license plate
 	hardCodedLocation = random.randint(0, Database_Size - 1)
 	Array_List[hardCodedLocation] = licPlate
-	Lic_Plate_Array = list(licPlate)
+	#Lic_Plate_Array = list(licPlate)
 	print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
 	#print(Array_List)
 
