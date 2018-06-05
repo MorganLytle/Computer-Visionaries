@@ -31,10 +31,22 @@ def apiCall():
 
   apiResult = json.loads(str(result))#converts json to a dictionary
   print(json.dumps(apiResult, indent = 2)+ "\n\n\n") #prints api data
-  licensePlate = str(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['name'])
-  print(licensePlate) #prints license plate number
-  #return apiResultstr(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['name'])
-  return licensePlate
+  class apiData:
+    def __init__(test, licPlate, conf, reg, regConf):
+      test.licPlate = licPlate
+      test.conf = conf
+      test.reg = reg
+      test.regConf = regConf
+
+  test1Plate = str(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['name'])
+  test1Conf = float(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['string']['confidence'])
+  test1Reg = str(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['region']['name'])
+  test1RegConf = float(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['region']['confidence'])
+  
+  apiData1 = apiData(test1Plate, test1Conf, test1Reg, test1RegConf)
+  print(apiData1.licPlate)#prints license plate number
+
+  return apiData1
   
 def main():
   apiCall()
