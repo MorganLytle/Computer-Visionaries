@@ -28,7 +28,7 @@ lastNames = ['Thagreat', 'Wong', 'Lam', 'Choi', 'Theboss',
 'Marth', 'Fox', 'Marvel', 'Waconda', 'Uzi',
 'Mario', 'Luigi', 'Cashmioutsyd', 'Howbowdat', 'Korotkov', 'SCOOP']
 
-Database_Size = 100000
+Database_Size = 100
 String = ""
 Array_List = [] #initialize list for cpu implementation 
                 #list use for cpu for alphabetizing to optimize search
@@ -71,7 +71,8 @@ for y in range(0,(Database_Size - 1)):
 	String = ""
 
 #calling license plate
-licPlate = cv.apiCall()
+apiData = cv.apiCall()
+licPlate = apiData.licPlate
 print("-----------------------------------\n")
 
 def getLic(licPlate):
@@ -91,7 +92,7 @@ def cpuSearch(licPlate):
 
 	hardCodedLocation = random.randint(0, Database_Size - 1)
 	Array_List[hardCodedLocation] = licPlate
-	#Lic_Plate_Array = list(licPlate)
+	#Lic_Plate_Array = list(licPlate) #not sure what this is 
 	print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
 	#print(Array_List)
 
@@ -116,7 +117,7 @@ def cpuSearch(licPlate):
 	Array_List_Sorted = sorted(Array_List)
 
 	print("\nSorted List\n")
-	#print(Array_List_Sorted)
+	print(Array_List_Sorted)
 
 	foundLocation = Database_Size + 1 #value if plate not in database
 	startTime = time.clock()
