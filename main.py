@@ -1,4 +1,3 @@
-#hello world
 import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
@@ -87,10 +86,7 @@ def cpuSearch(licPlate):
 	print("CPU implementation\n")
 
 	#hardcode test license plate
-	userNum = []
-	plateNum = raw_input('Type the license plate number you are looking for ')
-	#plateNum = "plateNum"
-	userNum = [plateNum]	
+	plateNum = raw_input('Type the license plate number you are looking for ')	
 	while(len(plateNum) != 7):
 		plateNum =  raw_input('License plate number was not recognized. Please try again: ')
 
