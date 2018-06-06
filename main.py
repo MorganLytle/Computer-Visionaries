@@ -65,17 +65,20 @@ for y in range(0,(Database_Size - 1)):
 	print(databaseClasses[y].name) 
 	#databaseClasses[y] = dataBase.append(String, RandRegion, RandName, RandPres, RandWanted)
 
-	#FIXME: assign string to array of class
-	#FIXME: randomly fill names
-	#FIXME: fill present and wanted vars 0 or 1 		
 	Array_List.append(String) #put the string at the end of the list 
 	String = ""
-
-databaseGPU = cuda.mem_alloc(databaseClasses.nbytes)
+#databaseGPU = cuda.mem_alloc(databaseClasses.nbytes)
 
 #calling license plate
 apiData = cv.apiCall()
 licPlate = apiData.licPlate
+RandomIndex = random.randint(0, Database_Size-1)
+
+#databaseClasses[RandomIndex].licPlate = licPlate
+#databaseClasses[RandomIndex].reg = apiData.reg
+print("\n"+ "Test string hardcoded at position " + str(RandomIndex) +"\n")
+
+
 print("-----------------------------------\n")
 
 def getLic(licPlate):
@@ -84,8 +87,7 @@ def getLic(licPlate):
 def cpuSearch(licPlate): 
 
 	print("CPU implementation\n")
-
-	#hardcode test license plate
+        #user interface
 	plateNum = raw_input('Type the license plate number you are looking for ')	
 	while(len(plateNum) != 7):
 		plateNum =  raw_input('License plate number was not recognized. Please try again: ')
@@ -94,7 +96,7 @@ def cpuSearch(licPlate):
 	Array_List[hardCodedLocation] = licPlate
 	#Lic_Plate_Array = list(licPlate) #not sure what this is 
 	print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
-	#print(Array_List)
+	print(Array_List)
 
 	foundLocation = Database_Size+1 #value if plate not in database
 
