@@ -1,3 +1,4 @@
+#hello world
 import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
@@ -84,7 +85,15 @@ def getLic(licPlate):
 def cpuSearch(licPlate): 
 
 	print("CPU implementation\n")
+
 	#hardcode test license plate
+	userNum = []
+	plateNum = raw_input('Type the license plate number you are looking for ')
+	#plateNum = "plateNum"
+	userNum = [plateNum]	
+	while(len(plateNum) != 7):
+		plateNum =  raw_input('License plate number was not recognized. Please try again: ')
+
 	hardCodedLocation = random.randint(0, Database_Size - 1)
 	Array_List[hardCodedLocation] = licPlate
 	#Lic_Plate_Array = list(licPlate) #not sure what this is 
