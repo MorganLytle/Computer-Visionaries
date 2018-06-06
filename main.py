@@ -6,8 +6,6 @@ import numpy as np
 import random
 import time
 import decimal
-import cpusearch
-
 #initialize list
 M = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F','G',
 'H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
@@ -18,7 +16,7 @@ regions = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
 'North Carolina', 'North Dakota', 'Ohio, Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
-'West Virginia', 'Wisconsin', 'Wyoming', 'Canada'] 
+'West Virginia', 'Wisconsin', 'Wyoming', 'Canada'] #FIXME: Make an array of regions
 
 firstNames = ['Jenn', 'Janis', 'Jasmine', 'Jessica', 'Zoey',
 'Bob', 'Captain', 'Sam', 'Morgan', 'Kevin', 'Tsz',
@@ -30,14 +28,13 @@ lastNames = ['Thagreat', 'Wong', 'Lam', 'Choi', 'Theboss',
 'Marth', 'Fox', 'Marvel', 'Waconda', 'Uzi',
 'Mario', 'Luigi', 'Cashmioutsyd', 'Howbowdat', 'Korotkov', 'SCOOP']
 
-Database_Size = 100
+Database_Size = 1000
 String = ""
 Array_List = [] #initialize list for cpu implementation 
                 #list use for cpu for alphabetizing to optimize search
 Array_List_Sorted = []
 Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to GPU
-#Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
-#Array_GPU = cuda.mem_alloc(databaseClasses.nbytes)
+Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
 Num_Digits = int(Database_Size * 7)
 databaseClasses = []
 
@@ -62,81 +59,77 @@ for y in range(0,(Database_Size - 1)):
 	RandPres = random.choice([0,1])
 	RandWanted = random.choice([0, 1])
 	
-	RandClass = dataBase(String, RandRegion, RandName, RandPres, RandWanted)
-	databaseClasses.append(RandClass)	
-	print(databaseClasses[y].name) 
+	g = dataBase(String, RandRegion, RandName, RandPres, RandWanted)
+	databaseClasses.append(g)	
+	
 	#databaseClasses[y] = dataBase.append(String, RandRegion, RandName, RandPres, RandWanted)
 
+	#FIXME: assign string to array of class
+	#FIXME: randomly fill names
+	#FIXME: fill present and wanted vars 0 or 1 		
 	Array_List.append(String) #put the string at the end of the list 
 	String = ""
-#databaseGPU = cuda.mem_alloc(databaseClasses.nbytes)
 
 #calling license plate
 apiData = cv.apiCall()
 licPlate = apiData.licPlate
-RandomIndex = random.randint(0, Database_Size-1)
-
-#databaseClasses[RandomIndex].licPlate = licPlate
-#databaseClasses[RandomIndex].reg = apiData.reg
-print("\n"+ "Test string hardcoded at position " + str(RandomIndex) +"\n")
-
-
 print("-----------------------------------\n")
 
 def getLic(licPlate):
-#	print (licPlate)
+	#print (licPlate)
 	return licPlate
-#def cpuSearch(licPlate): 
+def cpuSearch(licPlate): 
 
-#	print("CPU implementation\n")
-        #user interface
-#	plateNum = raw_input('Type the license plate number you are looking for ')	
-#	while(len(plateNum) != 7):
-#		plateNum =  raw_input('License plate number was not recognized. Please try again: ')
+	print("CPU implementation\n")
 
-#	hardCodedLocation = random.randint(0, Database_Size - 1)
-#	Array_List[hardCodedLocation] = licPlate
+	#hardcode test license plate
+	plateNum = raw_input('Type the license plate number you are looking for ')	
+	while(len(plateNum) != 7):
+		plateNum =  raw_input('License plate number was not recognized. Please try again: ')
+
+	hardCodedLocation = random.randint(0, Database_Size - 1)
+	Array_List[hardCodedLocation] = licPlate
 	#Lic_Plate_Array = list(licPlate) #not sure what this is 
-#	print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
-#	print(Array_List)
+	print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
+	print(Array_List)
 
-#	foundLocation = Database_Size+1 #value if plate not in database
+	foundLocation = Database_Size+1 #value if plate not in database
 
-#	print("\nUnsorted List\n")
+	print("\nUnsorted List\n")
 
-#	startTime = time.clock()
-#	for row in range(0, (Database_Size - 1)):
-#		if(Array_List[row]==licPlate):
-#			foundLocation = row
-#			break
-#	if(foundLocation > Database_Size):
-#		print("\nLicense plate not found in unsorted database\n")
-#	else:
-#		print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
-#	unsortedRuntime = float(time.clock()-startTime) 
-#	print("Time used to find license plate in unsorted list: ")
-#	print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
+	startTime = time.clock()
+	for row in range(0, (Database_Size - 1)):
+		if(Array_List[row]==plateNum):
+			foundLocation = row
+			break
+	if(foundLocation > Database_Size):
+		print("\nLicense plate not found in unsorted database\n")
+	else:
+		print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
+	unsortedRuntime = float(time.clock()-startTime) 
+	print("Time used to find license plate in unsorted list: ")
+	print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
 
 	#create sorted list
-#	Array_List_Sorted = sorted(Array_List)
+	Array_List_Sorted = sorted(Array_List)
 
-#	print("\nSorted List\n")
-#	print(Array_List_Sorted)
+	print("\nSorted List\n")
+	#print(Array_List_Sorted)
 
-#	foundLocation = Database_Size + 1 #value if plate not in database
-#	startTime = time.clock()
-#	for row in range(0, (Database_Size - 1)):
-#		if(Array_List_Sorted[row]==licPlate):
-#			foundLocation = row
-#			break 
+	foundLocation = Database_Size + 1 #value if plate not in database
+	startTime = time.clock()
+	for row in range(0, (Database_Size - 1)):
+		if(Array_List_Sorted[row]==plateNum):
+			foundLocation = row
+			break 
 
-#	if(foundLocation > Database_Size):
-#		print("\nLicense plate not found in sorted database\n")  
-#	else:
-#		print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
-#	sortedRuntime = float(time.clock() - startTime)
-#	print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
-#	print("-----------------------------------\n")
+	if(foundLocation > Database_Size):
+		print("\nLicense plate not found in sorted database\n")  
+	else:
+		print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
+	sortedRuntime = float(time.clock() - startTime)
+	print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
+	print("-----------------------------------\n")
 
 
 #cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
@@ -199,7 +192,7 @@ def getLic(licPlate):
 		#print(licensePlateIndex_h)
     
 def main():
-	cpusearch.cpuSearch(licPlate)	 
+	cpuSearch(licPlate)	 
 if __name__ == "__main__":
 	main()
  
