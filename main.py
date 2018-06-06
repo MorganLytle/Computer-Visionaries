@@ -16,7 +16,7 @@ regions = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
 'North Carolina', 'North Dakota', 'Ohio, Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
-'West Virginia', 'Wisconsin', 'Wyoming', 'Canada'] #FIXME: Make an array of regions
+'West Virginia', 'Wisconsin', 'Wyoming', 'Canada'] 
 
 firstNames = ['Jenn', 'Janis', 'Jasmine', 'Jessica', 'Zoey',
 'Bob', 'Captain', 'Sam', 'Morgan', 'Kevin', 'Tsz',
@@ -34,7 +34,8 @@ Array_List = [] #initialize list for cpu implementation
                 #list use for cpu for alphabetizing to optimize search
 Array_List_Sorted = []
 Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to GPU
-Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
+#Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
+#Array_GPU = cuda.mem_alloc(databaseClasses.nbytes)
 Num_Digits = int(Database_Size * 7)
 databaseClasses = []
 
@@ -59,9 +60,9 @@ for y in range(0,(Database_Size - 1)):
 	RandPres = random.choice([0,1])
 	RandWanted = random.choice([0, 1])
 	
-	g = dataBase(String, RandRegion, RandName, RandPres, RandWanted)
-	databaseClasses.append(g)	
-	
+	RandClass = dataBase(String, RandRegion, RandName, RandPres, RandWanted)
+	databaseClasses.append(RandClass)	
+	print(databaseClasses[y].name) 
 	#databaseClasses[y] = dataBase.append(String, RandRegion, RandName, RandPres, RandWanted)
 
 	#FIXME: assign string to array of class
@@ -69,6 +70,8 @@ for y in range(0,(Database_Size - 1)):
 	#FIXME: fill present and wanted vars 0 or 1 		
 	Array_List.append(String) #put the string at the end of the list 
 	String = ""
+
+databaseGPU = cuda.mem_alloc(databaseClasses.nbytes)
 
 #calling license plate
 apiData = cv.apiCall()
