@@ -132,7 +132,7 @@ def cpuSearch(licPlate):
 	print("-----------------------------------\n")
 
 
-#cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
+cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
 
 #cuda kernel python wrapper
 #mod = SourceModule("""
