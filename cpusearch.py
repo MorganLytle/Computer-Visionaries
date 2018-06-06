@@ -68,7 +68,7 @@ def cpuSearch(licPlate):
 
         if(foundLocation > Database_Size):
                 print("\nLicense plate not found in sorted database\n")
-       else:
+        else:
                 print("\nLicense plate found in sorted database at position " + str(foundLocation)+ "\n")
         sortedRuntime = float(time.clock() - startTime)
         print(str(decimal.Decimal(sortedRuntime))+ " seconds\n")
