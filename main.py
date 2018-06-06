@@ -199,7 +199,7 @@ def getLic(licPlate):
 		#print(licensePlateIndex_h)
     
 def main():
-	cpuSearch(licPlate)	 
+	cpusearch.cpuSearch(licPlate)	 
 if __name__ == "__main__":
 	main()
  
