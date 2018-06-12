@@ -30,7 +30,7 @@ def apiCall():
   #print("Detection Results = " + str(result) + "\n\n\n")
 
   apiResult = json.loads(str(result))#converts json to a dictionary
-  print(json.dumps(apiResult, indent = 2)+ "\n\n\n") #prints api data
+#  print(json.dumps(apiResult, indent = 2)+ "\n\n\n") #prints api data
   class apiData:
     def __init__(test, licPlate, conf, reg, regConf):
       test.licPlate = licPlate
