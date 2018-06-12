@@ -29,84 +29,92 @@ for y in range(0,(Database_Size-1)):
 #hardcode licPLate to be in the random database
 licPlate = "6VJV182"
 #hardcode test licPlate to database
-hardCodedLocation = random.randint(0, Database_Size - 1)
-Array_List[hardCodedLocation] = licPlate
-print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
-print(Array_List)
+#hardCodedLocation = random.randint(0, Database_Size - 1)
+#Array_List[hardCodedLocation] = licPlate
+#print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
+#print(Array_List)
 
 
-def cpuSearch(licPlate): 
-	print("CPU implementation\n")
-	#user interface
-	plateNum = raw_input('Type the license plate number you are looking for ')
-	while(len(plateNum) != 7):
-		plateNum =  raw_input('License plate number was not recognized. Please try again: ')
+def cpuSearch(licPlate):
 
+        present = random.randint(0,1)
+        i = 1
+        while (i<2):
+                print("CPU implementation\n")
+                #user interface
+                plateNum = raw_input('Type the license plate number you are looking for ')
+                while(len(plateNum) != 7):
+                        plateNum =  raw_input('License plate number was not recognized. Please try again: ')
 
-        #no car in the parking lot
-        present = 0
-        flag = random.randint(0,1)
-#        print(flag)
-	if(flag == 1):
-                #car enter/leave the parking lot
-                #car entered
-		present = 1
-                if(present == 1):
-                        print('Car entered')
-	                #calling license plate
-        	        apiData = cv.apiCall()
-               		licPlate = apiData.licPlate
-                	conf = apiData.conf
-	                reg = apiData.reg
-	
-        	        def getLic(licPlate):
-                	        return licPlate
+                hardCodedLocation = random.randint(0, Database_Size - 1)
+                Array_List[hardCodedLocation] = licPlate
+                print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
+                print(Array_List)
 
-              		def getConf(conf):
-                       		return conf
-
-	                def getReg(reg):
-        	                return reg
-
-               	else:
-			pass
-                        #print("\n"+"Car left"+"\n")
-	else:
-		pass
-
-
-	foundLocation = Database_Size+1 #value if plate not in database
-	
-	for row in range(0, (Database_Size - 1)):
-		if(Array_List[row]==plateNum):
-			foundLocation = row
-			break
-	if(foundLocation > Database_Size):
-		print("\nLicense plate not found in unsorted database\n")
-	else:
-		print("\nLicense plate found in unsorted database at position " + str(foundLocation)+ "\n")
-		print('print informaton')
-		print('Owner: Morgan')
-		print('licPlate: '+ licPlate)
-		if (present == 1):
-			print('Confidence: ' + str(conf))
-			print('Region: ' + str(reg))
-			print('Car in the parking lot')
+                #randomlize car in parking or not
+                present = random.randint(0,1)
+                #randomlize car enter or not
+                flag = random.randint(0,1)
+                if (flag == 1):
+                        #car entered/leave the parking lot
+                        if (present == 0):
+                                present = 1
+                                print('Car entered')
+                        else:
+                                present = 0
+                                print('Car left')
+               		#call api for pic info
+                	apiData = cv.apiCall()
+                	licPlate = apiData.licPlate
+                	def getLic(licPlate):
+                        	return licPlate
+			#JUSTADD
+			print('license plate of the car just entered: ' + licPlate)
 		else:
-			print('Car not in the parking lot')
-			pass
+			print('No car has entered or left the parking lot')
 
-	#no car in the parking lot
-#	present = 0
-#	flag = random.choice([0,1])
-#	if(flag == 1)
-#		#car enter/leave the parking lot 
-#		present = !present
-#		if(present == 1)
-#			print("\n"+"Car entered"+"\n")
-#		else:
-#			print("\n"+"Car left"+"\n")			
+                foundLocation = Database_Size+1 #value if plate not in database
 
+                print("\nUnsorted List\n")
+
+#                startTime = time.clock()
+                for row in range(0, (Database_Size - 1)):
+                        if(Array_List[row]==plateNum):
+                                foundLocation = row
+                                break
+                if(foundLocation > Database_Size):
+                        print('License plate ' + plateNum + ' not found in unsorted database')
+                else:
+                        print('License plate ' + plateNum + ' found in unsorted database at position ' + str(foundLocation)+"\n")
+                        #call dictionary info
+                        print('license plate: ' + licPlate)
+                        if(present == 1):
+                                print('Car is in the parking lot')
+                        else:
+                                print('Car is not in the paking lot')
+
+#                unsortedRuntime = float(time.clock()-startTime)
+#                print("Time used to find license plate in unsorted list: ")
+#                print(str(decimal.Decimal(unsortedRuntime))+ " seconds\n")
+
+
+                cont = raw_input('Do you want to make another search (Y/N)?')
+		#if(cont == Y)
+		#	i = 1
+			
+		
+	
+		while (cont != 'Y' or cont != 'N'):
+                        if (cont == 'Y'):
+                                i = 1
+                                print('Another search')
+                                break
+                        elif(cont == 'N'):
+                                i = 2
+                                print('End of searching')
+                                break
+			cont = raw_input('Do you want to make another search (Y/N)?')
+		
 def main():
 	cpuSearch(licPlate)
 if __name__ == "__main__":
