@@ -91,55 +91,59 @@ print("-----------------------------------\n")
 #Array_H = np.random.randn(1, size).astype(np.float32)
 
 cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
-Num_Digits = np.int32(Database_Size * 7)
+#Num_Digits = np.int32(Database_Size * 7)
 #cuda kernel python wrapper
 mod = SourceModule("""
+	#include <stdio.h>
+
+
 	__global__ void gpuSearch(char** Array_GPU, int Database_Size, int Num_Digits, char* licPlate){ 
-	__shared__ float currentRow[7];
+		__shared__ float currentRow[7];
   
-	int Row = blockIdx.y * blockDim.y + threadIdx.y;
-	int Col=0;
-	int matchedChar = 0;
-  	int licensePlateIndex = 0;
-	for(int y = 0; y < 7; ++y) //put current row into shared memory
-	{
-		currentRow[y] = Array_GPU[Row][y];
-	}
-	__syncthreads();
-    
-	while(Col < 7) //search current row to match with the licPlate
-	{
-		if(currentRow[Col] == licPlate[Col])
-		{
-			++matchedChar;
+		int Row = blockIdx.y * blockDim.y + threadIdx.y;
+		int Col=0;
+		int matchedChar = 0;
+  		int licensePlateIndex = 0;
+		//put current row into shared memory
+		for(int y = 0; y < 7; ++y){ 
+
+			currentRow[y] = Array_GPU[Row][y];
 		}
-    
+		__syncthreads();
+     		//search current row to match with the licPlate
+		while(Col < 7){
+			if(currentRow[Col] == licPlate[Col]){
+				++matchedChar;
+			}
+    			else{
+				matchedChar = 0;
+				Col = 0;
+				break;
+			}
+			++Col;
+		}
+		if(matchedChar == 7)
+		{
+			licensePlateIndex = Row;
+		}
 		else
 		{
-			matchedChar = 0;
-			Col = 0;
-			break;
+			licensePlateIndex = Database_Size + 1; //not found
 		}
-		++Col;
-	}
-	if(matchedChar == 7)
-	{
-		licensePlateIndex = Row;
-	}
-	else
-	{
-		licensePlateIndex = Database_Size + 1; //not found
-	}
-	__syncthreads();
+	//	__syncthreads();
 	}
 	""") 
-licPlate = "6VJV182" #FIXME unhardcode
-#Num_Digit = Database_Size*7
+#licPlate = np.fromstring('6VJV182', dtype = str) #FIXME unhardcode
+
+#nplicPlate = np.chararray((1, 7))
+nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2']) 
+npDatabase_Size = np.int32(Database_Size)
+Num_Digits = np.int32(npDatabase_Size*7)
 blockSize = 256  
 grid = (10,1) #FIXME ADD GRID DIMENSIONS
 block = (256,1,1) #FIXME ADD BLOCK DIMENSIONS
 function = mod.get_function("gpuSearch")
-function(Array_GPU, Database_Size, Num_Digits, licPlate, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
+function(Array_GPU, npDatabase_Size, Num_Digits, nplicPlate, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
 
 licensePlateIndex_h = 0
 
