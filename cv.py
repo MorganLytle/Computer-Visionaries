@@ -44,7 +44,7 @@ def apiCall():
   test1RegConf = float(apiResult['objects'][0]['licenseplateAnnotation']['attributes']['system']['region']['confidence'])
   
   apiData1 = apiData(test1Plate, test1Conf, test1Reg, test1RegConf)
-  print(apiData1.licPlate)#prints license plate number
+ # print(apiData1.licPlate)#prints license plate number
 
   return apiData1
   
