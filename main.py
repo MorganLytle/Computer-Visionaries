@@ -17,7 +17,7 @@ regions = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York',
 'North Carolina', 'North Dakota', 'Ohio, Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
-'West Virginia', 'Wisconsin', 'Wyoming', 'Canada'] 
+'West Virginia', 'Wisconsin', 'Wyoming', 'Canada']
 
 firstNames = ['Jenn', 'Janis', 'Jasmine', 'Jessica', 'Zoey',
 'Bob', 'Captain', 'Sam', 'Morgan', 'Kevin', 'Tsz',
@@ -31,7 +31,7 @@ lastNames = ['Thagreat', 'Wong', 'Lam', 'Choi', 'Theboss',
 
 Database_Size = np.int32(1000)
 String = ""
-Array_List = [] #initialize list for cpu implementation 
+Array_List = [] #initialize list for cpu implementation
                 #list use for cpu for alphabetizing to optimize search
 Array_List_Sorted = []
 Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to GPU
@@ -55,25 +55,26 @@ def getLic():
         return licPlate
 
 
+
 for y in range(0,(Database_Size)):
-	#create random license plate
-	for x in range(0,7):
-		RandIndex = random.randint(0,35)
-		RandChar = M[RandIndex]
-		String = String+RandChar
+        #create random license plate
+        for x in range(0,7):
+                RandIndex = random.randint(0,35)
+                RandChar = M[RandIndex]
+                String = String+RandChar
                 Array_H[y][x] = RandChar
-	
-	RandRegion = regions[random.randint(0,49)]
-	RandName = firstNames[random.randint(0,19)] + ' ' + lastNames[random.randint(0,19)]
-	RandPres = random.choice([0,1])
-	RandWanted = random.choice([0, 1])	
 
-	innerPlate = {'plateNum':String, 'name':RandName, 'region':RandRegion, 'present':RandPres, 'wanted':RandWanted}
-	licensePlate[y] = innerPlate
+        RandRegion = regions[random.randint(0,49)]
+        RandName = firstNames[random.randint(0,19)] + ' ' + lastNames[random.randint(0,19)]
+        RandPres = random.choice([0,1])
+        RandWanted = random.choice([0, 1])
 
-	Array_List.append(String) #put the string at the end of the list 
-	String = ""
-	
+        innerPlate = {'plateNum':String, 'name':RandName, 'region':RandRegion, 'present':RandPres, 'wanted':RandWanted}
+        licensePlate[y] = innerPlate
+
+        Array_List.append(String) #put the string at the end of the list
+        String = ""
+
 apiInfo = cv.apiCall()
 hardCodedLocation = random.randint(0, Database_Size - 1)
 hardCodedPlate = getLic()
@@ -90,7 +91,7 @@ licensePlate[hardCodedLocation] = innerPlate
 #print(Array_List)
 
 #print(licensePlate[1])
-#print(licensePlate[1]['region']) 
+#print(licensePlate[1]['region'])
 print("-----------------------------------\n")
 
 #size = np.int32(2560)
@@ -101,49 +102,51 @@ cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
 #Num_Digits = np.int32(Database_Size * 7)
 #cuda kernel python wrapper
 mod = SourceModule("""
-	#include <stdio.h>
+        #include <stdio.h>
 
 
-	__global__ void gpuSearch(char** Array_GPU, int Database_Size, int Num_Digits, char* licPlate){ 
-		__shared__ float currentRow[7];
-  
-		int Row = blockIdx.y * blockDim.y + threadIdx.y;
-		int Col=0;
-		int matchedChar = 0;
-  		int licensePlateIndex = 0;
-		//put current row into shared memory
-		for(int y = 0; y < 7; ++y){ 
+        __global__ void gpuSearch(char* Array_GPU, int Database_Size, int Num_Digits, char* licPlate, int* licIndex){
+                __shared__ float currentRow[7];
 
-			currentRow[y] = Array_GPU[Row][y];
-		}
-		__syncthreads();
-     		//search current row to match with the licPlate
-		while(Col < 7){
-			if(currentRow[Col] == licPlate[Col]){
-				++matchedChar;
-			}
-    			else{
-				matchedChar = 0;
-				Col = 0;
-				break;
-			}
-			++Col;
-		}
-		if(matchedChar == 7)
-		{
-			licensePlateIndex = Row;
-		}
-		else
-		{
-			licensePlateIndex = Database_Size + 1; //not found
-		}
-	//	__syncthreads();
-	}
-	""") 
+
+                int Row = blockIdx.y * blockDim.y + threadIdx.y;
+                int Col=0;
+                int matchedChar = 0;
+                int licensePlateIndex = 0;
+                //put current row into shared memory
+                for(int y = 0; y < 7; ++y){
+
+                        currentRow[y] = Array_GPU[Row*7+y];
+                }
+                __syncthreads();
+                //search current row to match with the licPlate
+                while(Col < 7){
+                        if(currentRow[Col] == licPlate[Col]){
+                                ++matchedChar;
+                        }
+                        else{
+                                matchedChar = 0;
+                                Col = 0;
+                                break;
+                        }
+                        ++Col;
+                }
+                if(matchedChar == 7)
+                {
+                        licensePlateIndex = Row;
+                }
+                else
+                {
+                        licensePlateIndex = Database_Size + 1; //not found
+                }
+                *licIndex = licensePlateIndex;
+        //      __syncthreads();
+        }
+        """)
 #licPlate = np.fromstring('6VJV182', dtype = str) #FIXME unhardcode
 
 #nplicPlate = np.chararray((1, 7))
-nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2']) 
+nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2'])
 licPlate_GPU = cuda.mem_alloc(nplicPlate.nbytes)
 #Num_Digits_GPU = cuda.mem_alloc(Num_Digits.nbytes)
 #Database_Size_GPU = cuda.mem_alloc(Database_Size.nbytes)
@@ -152,40 +155,47 @@ cuda.memcpy_htod(licPlate_GPU,nplicPlate)
 #cuda.memcpy_htod(Num_Digits_GPU, Num_Digits)
 npDatabase_Size = np.int32(Database_Size)
 #Num_Digits = np.int32(Database_Size*7)
-blockSize = 256  
+blockSize = 256
 grid = (10,1) #FIXME ADD GRID DIMENSIONS
 block = (256,1,1) #FIXME ADD BLOCK DIMENSIONS
 function = mod.get_function("gpuSearch")
-Array_GPU = np.zeros(shape=(Database_Size,7))
+#Array_GPU = np.zeros(shape=(Database_Size,7))
 print(type(Array_GPU))
 print(type(npDatabase_Size))
+
 print(type(Num_Digits))
 print(type(nplicPlate))
- 
-function(Array_GPU, Database_Size, Num_Digits, licPlate_GPU, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
 
-licensePlateIndex_h = 0
+
+licensePlateIndex_d = cuda.mem_alloc(4)
+licensePlateIndex_h = np.zeros(1).astype(np.int32)
+
+print(type(licensePlateIndex_d))
+print(type(licensePlateIndex_h))
+
+function(Array_GPU, Database_Size, Num_Digits, licPlate_GPU, licensePlateIndex_d, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
+
 
 #a_doubled = np.empty_like(Array_H)
 
 cuda.memcpy_dtoh(licensePlateIndex_h, licensePlateIndex_d) #returns location of license plate
 
 if (licensePlateIndex_h >= Database_Size):
-	print("License Plate not in database. \n")
-  
-else: 
-	print(licensePlateIndex_h)
-    
+        print("License Plate not in database. \n")
+
+else:
+        print(licensePlateIndex_h)
+
 def main():
-	#cpuSearch(licPlate)	 
-	licPlate = getLic() #getting api license plate
-	present = random.randint(0,1)
+        #cpuSearch(licPlate)
+        licPlate = getLic() #getting api license plate
+        present = random.randint(0,1)
         i = 1
         #call api for pic info
        # apiData = cv.apiCall()
        # licPlate = getLic()#apiData.licPlate
 
-	while i < 2:
+        while i < 2:
                 print("CPU implementation\n")
                 #user interface
                 plateNum = raw_input('Type the license plate number you are looking for ')
@@ -199,14 +209,15 @@ def main():
 
                 #randomlize car in parking or not
   #              present = random.randint(0,1)
-              
+
 
                 foundLocation = Database_Size+1 #value if plate not in database
 
                 for row in range(0, (Database_Size - 1)):
                         if(Array_List[row]==plateNum):
                                 foundLocation = row
-				break
+                                break
+
 
                 #randomlize car enter or not
                 flag = random.randint(0,1)
@@ -231,18 +242,18 @@ def main():
                         #call dictionary info
                         print('Car information')
                         print('license plate: ' + licPlate)
-			print('Owner name: '+ licensePlate[foundLocation]['name'])
-			print('Region: '+licensePlate[foundLocation]['region'])	
+                        print('Owner name: '+ licensePlate[foundLocation]['name'])
+                        print('Region: '+licensePlate[foundLocation]['region'])
 
                         if(present == 1):
                                 print('Car is in the parking lot')
                         else:
                                 print('Car is not in the paking lot')
-			#wanted = random.randint(0,1)
-			if (licensePlate[foundLocation]['wanted'] == 1):
-				print('The car is wanted')
-			else:
-				print('The car is not wanted')
+                        #wanted = random.randint(0,1)
+                        if (licensePlate[foundLocation]['wanted'] == 1):
+                                print('The car is wanted')
+                        else:
+                                print('The car is not wanted')
 
                 cont = raw_input('Do you want to make another search (Y/N)?')
                 while (cont != 'Y' or cont != 'N'):
@@ -254,9 +265,10 @@ def main():
                                 i = 2
                                 print('End of searching')
                                 break
-  			cont = raw_input('Do you want to make another search (Y/N)?')
+                        cont = raw_input('Do you want to make another search (Y/N)?')
 
 if __name__ == "__main__":
-	main()
- 
+        main()
+
+
 
