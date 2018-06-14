@@ -29,7 +29,7 @@ lastNames = ['Thagreat', 'Wong', 'Lam', 'Choi', 'Theboss',
 'Marth', 'Fox', 'Marvel', 'Waconda', 'Uzi',
 'Mario', 'Luigi', 'Cashmioutsyd', 'Howbowdat', 'Korotkov', 'SCOOP']
 
-Database_Size = 1000
+Database_Size = np.int32(1000)
 String = ""
 Array_List = [] #initialize list for cpu implementation 
                 #list use for cpu for alphabetizing to optimize search
@@ -37,7 +37,13 @@ Array_List_Sorted = []
 Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to GPU
 print(type(Array_H))
 Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
-Num_Digits = int(Database_Size * 7)
+#Database_Size_GPU = cuda.mem_alloc(Database_Size.nbytes)
+#Num_Digits_GPU = cuda.mem_alloc(Num_Digits.nbytes)
+#licPlate_GPU = cuda.mem_alloc(licPlate.nbytes)
+
+
+
+Num_Digits = np.int32(Database_Size * 7)
 databaseClasses = []
 
 licensePlate = {}
@@ -91,6 +97,7 @@ print("-----------------------------------\n")
 #Array_H = np.random.randn(1, size).astype(np.float32)
 
 cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
+#cuda.memcpy_htod(Database_Size_GPU, Database_Size)
 #Num_Digits = np.int32(Database_Size * 7)
 #cuda kernel python wrapper
 mod = SourceModule("""
@@ -137,13 +144,25 @@ mod = SourceModule("""
 
 #nplicPlate = np.chararray((1, 7))
 nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2']) 
+licPlate_GPU = cuda.mem_alloc(nplicPlate.nbytes)
+#Num_Digits_GPU = cuda.mem_alloc(Num_Digits.nbytes)
+#Database_Size_GPU = cuda.mem_alloc(Database_Size.nbytes)
+#cuda.memcpy_htod(Database_Size_GPU, Database_Size)
+cuda.memcpy_htod(licPlate_GPU,nplicPlate)
+#cuda.memcpy_htod(Num_Digits_GPU, Num_Digits)
 npDatabase_Size = np.int32(Database_Size)
-Num_Digits = np.int32(npDatabase_Size*7)
+#Num_Digits = np.int32(Database_Size*7)
 blockSize = 256  
 grid = (10,1) #FIXME ADD GRID DIMENSIONS
 block = (256,1,1) #FIXME ADD BLOCK DIMENSIONS
 function = mod.get_function("gpuSearch")
-function(Array_GPU, npDatabase_Size, Num_Digits, nplicPlate, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
+Array_GPU = np.zeros(shape=(Database_Size,7))
+print(type(Array_GPU))
+print(type(npDatabase_Size))
+print(type(Num_Digits))
+print(type(nplicPlate))
+ 
+function(Array_GPU, Database_Size, Num_Digits, licPlate_GPU, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
 
 licensePlateIndex_h = 0
 
