@@ -76,7 +76,7 @@ for y in range(0,(Database_Size)):
         String = ""
 
 apiInfo = cv.apiCall()
-hardCodedLocation = random.randint(0, Database_Size - 1)
+hardCodedLocation = 22#random.randint(0, Database_Size - 1)
 hardCodedPlate = getLic()
 hardCodedReg = apiInfo.reg
 hardCodedName = "Morgan Lytle"
@@ -110,6 +110,7 @@ cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
 #cuda.memcpy_htod(Database_Size_GPU, Database_Size)
 #Num_Digits = np.int32(Database_Size * 7)
 #cuda kernel python wrapper
+
 
 mod = SourceModule("""
         #include <stdio.h>
@@ -185,10 +186,12 @@ licensePlateIndex_d = cuda.mem_alloc(licensePlateIndex_h.nbytes)
 #print("licensePlateIndex_d", type(licensePlateIndex_d), licensePlateIndex_d)
 #print("licensePlateIndex_h", type(licensePlateIndex_h), licensePlateIndex_h)
 
+start = time.time()
 function(Array_GPU, Database_Size, Num_Digits, licPlate_GPU, licensePlateIndex_d, grid = (1,1,1), block = (256,1,1)) #FIXME ADD PARAMETERS
+end = time.time()
+print "\n\n Time taken to execute ", end-start, "seconds"
 
 #print('kernel done')
-
 #a_doubled = np.empty_like(Array_H)
 
 cuda.memcpy_dtoh(licensePlateIndex_h, licensePlateIndex_d) #returns location of license plate
@@ -201,6 +204,8 @@ if (licensePlateIndex_h >= Database_Size):
 '''else:
         print('GPU version: license plate at '+ str(licensePlateIndex_h))'''
 #print('if statemnt')
+
+
 
 def main():
         #cpuSearch(licPlate)
@@ -228,12 +233,13 @@ def main():
 
 
                 foundLocation = Database_Size+1 #value if plate not in database
-
+		start = time.time()	
                 for row in range(0, (Database_Size)):
                         if(Array_List[row]==plateNum):
                                 foundLocation = row
                                 break
-
+		end = time.time()
+		print "CPU Execution time is ", (end-start)
 
                 #randomlize car enter or not
                 flag = random.randint(0,1)
