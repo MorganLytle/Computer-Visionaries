@@ -34,8 +34,8 @@ String = ""
 Array_List = [] #initialize list for cpu implementation
                 #list use for cpu for alphabetizing to optimize search
 Array_List_Sorted = []
-Array_H = np.chararray((Database_Size,7))#initialize empty array to be copied to GPU
-print(type(Array_H))
+Array_H = np.chararray((Database_Size*7))#initialize empty array to be copied to GPU
+#print(type(Array_H))
 Array_GPU = cuda.mem_alloc(Array_H.nbytes) #Allocates GPU memory for database
 #Database_Size_GPU = cuda.mem_alloc(Database_Size.nbytes)
 #Num_Digits_GPU = cuda.mem_alloc(Num_Digits.nbytes)
@@ -62,7 +62,7 @@ for y in range(0,(Database_Size)):
                 RandIndex = random.randint(0,35)
                 RandChar = M[RandIndex]
                 String = String+RandChar
-                Array_H[y][x] = RandChar
+                Array_H[y+x] = RandChar
 
         RandRegion = regions[random.randint(0,49)]
         RandName = firstNames[random.randint(0,19)] + ' ' + lastNames[random.randint(0,19)]
@@ -92,61 +92,70 @@ licensePlate[hardCodedLocation] = innerPlate
 
 #print(licensePlate[1])
 #print(licensePlate[1]['region'])
-print("-----------------------------------\n")
+#print("-----------------------------------\n")
 
 #size = np.int32(2560)
 #Array_H = np.random.randn(1, size).astype(np.float32)
-
+#print('kernel start')
+GPUlocation = 61
+print('GPULocation '+str(GPUlocation))
+nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2'])
+for i in range (0, 7):
+	Array_H[(GPUlocation*6)+i] = nplicPlate[i]
+Array_H = np.transpose(Array_H)
+for j in range(0,7):
+	print(Array_H[j+GPUlocation*6])
+#print(Array_H)
 cuda.memcpy_htod(Array_GPU, Array_H) #transfers array to GPU
 #cuda.memcpy_htod(Database_Size_GPU, Database_Size)
 #Num_Digits = np.int32(Database_Size * 7)
 #cuda kernel python wrapper
+
 mod = SourceModule("""
         #include <stdio.h>
-
+	#include <limits.h>
+	//#include <stdint.h>
 
         __global__ void gpuSearch(char* Array_GPU, int Database_Size, int Num_Digits, char* licPlate, int* licIndex){
-                __shared__ float currentRow[7];
+                //__shared__ float currentRow[7];
 
+                int i = (blockIdx.x * blockDim.x) + threadIdx.x;
+		int stride = blockDim.x*gridDim.x;
+                int licensePlateIndex = INT_MAX;
+		while(i<Database_Size) {
+			int matchedChar = 0;
+			int currChar = 0;
+			for(int col = 0; col<7;col++) {
+				currChar = i+col;
+				if(licPlate[col]==Array_GPU[currChar]) {
+					matchedChar=1;
+				}
+				else {
+					matchedChar=0;
+					break;
+				}
+			}
+			if(matchedChar == 1){
+				licensePlateIndex = i/42;
+				printf("Stride = %u | Match found at %d | ", stride, licensePlateIndex);
+				break;
+			}
+			i+=stride;
+		}
 
-                int Row = blockIdx.y * blockDim.y + threadIdx.y;
-                int Col=0;
-                int matchedChar = 0;
-                int licensePlateIndex = 0;
-                //put current row into shared memory
-                for(int y = 0; y < 7; ++y){
-
-                        currentRow[y] = Array_GPU[Row*7+y];
-                }
-                __syncthreads();
-                //search current row to match with the licPlate
-                while(Col < 7){
-                        if(currentRow[Col] == licPlate[Col]){
-                                ++matchedChar;
-                        }
-                        else{
-                                matchedChar = 0;
-                                Col = 0;
-                                break;
-                        }
-                        ++Col;
-                }
-                if(matchedChar == 7)
-                {
-                        licensePlateIndex = Row;
-                }
-                else
-                {
-                        licensePlateIndex = Database_Size + 1; //not found
-                }
-                *licIndex = licensePlateIndex;
-        //      __syncthreads();
-        }
+		if (licensePlateIndex != INT_MAX)
+                	*licIndex = licensePlateIndex;
+		__syncthreads();
+		if (threadIdx.x == 0)
+			printf("%d", *licIndex);
+       }
         """)
+#GPULocation = random.randint(0,Database_Size)
+#print('GPU Location' +GPULocation)
 #licPlate = np.fromstring('6VJV182', dtype = str) #FIXME unhardcode
-
+#print('after kernel')
 #nplicPlate = np.chararray((1, 7))
-nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2'])
+#nplicPlate = np.array(['6', 'V', 'J', 'V', '1', '8', '2'])
 licPlate_GPU = cuda.mem_alloc(nplicPlate.nbytes)
 #Num_Digits_GPU = cuda.mem_alloc(Num_Digits.nbytes)
 #Database_Size_GPU = cuda.mem_alloc(Database_Size.nbytes)
@@ -156,35 +165,42 @@ cuda.memcpy_htod(licPlate_GPU,nplicPlate)
 npDatabase_Size = np.int32(Database_Size)
 #Num_Digits = np.int32(Database_Size*7)
 blockSize = 256
-grid = (10,1) #FIXME ADD GRID DIMENSIONS
+grid = (1,1,1) #FIXME ADD GRID DIMENSIONS
 block = (256,1,1) #FIXME ADD BLOCK DIMENSIONS
 function = mod.get_function("gpuSearch")
 #Array_GPU = np.zeros(shape=(Database_Size,7))
-print(type(Array_GPU))
-print(type(npDatabase_Size))
+#print("Array_GPU", type(Array_GPU))
+#print("npDatabase_Size", type(npDatabase_Size))
 
-print(type(Num_Digits))
-print(type(nplicPlate))
+#print("Num_Digits", type(Num_Digits))
+#print("npliPlate", type(nplicPlate))
 
-
-licensePlateIndex_d = cuda.mem_alloc(4)
+#licensePlateIndex_d = cuda.mem_alloc(24)
 licensePlateIndex_h = np.zeros(1).astype(np.int32)
+#print(licensePlateIndex_h.nbytes)
+licensePlateIndex_d = cuda.mem_alloc(licensePlateIndex_h.nbytes)
+#licIndex = cuda.mem_alloc(licensePlateIndex_h.nbytes)
 
-print(type(licensePlateIndex_d))
-print(type(licensePlateIndex_h))
 
-function(Array_GPU, Database_Size, Num_Digits, licPlate_GPU, licensePlateIndex_d, grid = (10,1), block = (256,1,1)) #FIXME ADD PARAMETERS
+#print("licensePlateIndex_d", type(licensePlateIndex_d), licensePlateIndex_d)
+#print("licensePlateIndex_h", type(licensePlateIndex_h), licensePlateIndex_h)
 
+function(Array_GPU, Database_Size, Num_Digits, licPlate_GPU, licensePlateIndex_d, grid = (1,1,1), block = (256,1,1)) #FIXME ADD PARAMETERS
+
+#print('kernel done')
 
 #a_doubled = np.empty_like(Array_H)
 
 cuda.memcpy_dtoh(licensePlateIndex_h, licensePlateIndex_d) #returns location of license plate
 
-if (licensePlateIndex_h >= Database_Size):
-        print("License Plate not in database. \n")
+#print('memcpy done')
 
-else:
-        print(licensePlateIndex_h)
+if (licensePlateIndex_h >= Database_Size):
+        print("GPU version: License Plate not in database. \n")
+
+'''else:
+        print('GPU version: license plate at '+ str(licensePlateIndex_h))'''
+#print('if statemnt')
 
 def main():
         #cpuSearch(licPlate)
@@ -196,7 +212,7 @@ def main():
        # licPlate = getLic()#apiData.licPlate
 
         while i < 2:
-                print("CPU implementation\n")
+                print("\n\nCPU implementation\n")
                 #user interface
                 plateNum = raw_input('Type the license plate number you are looking for ')
                 while(len(plateNum) != 7):
@@ -204,8 +220,8 @@ def main():
 
   #             hardCodedLocation = random.randint(0, Database_Size - 1)
                 Array_List[hardCodedLocation] = getLic()
-                print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
-                print(Array_List)
+  #              print("\n"+ "Test string at position " + str(hardCodedLocation) +"\n")
+  #              print(Array_List)
 
                 #randomlize car in parking or not
   #              present = random.randint(0,1)
@@ -213,7 +229,7 @@ def main():
 
                 foundLocation = Database_Size+1 #value if plate not in database
 
-                for row in range(0, (Database_Size - 1)):
+                for row in range(0, (Database_Size)):
                         if(Array_List[row]==plateNum):
                                 foundLocation = row
                                 break
@@ -241,7 +257,7 @@ def main():
 
                         #call dictionary info
                         print('Car information')
-                        print('license plate: ' + licPlate)
+                        print('license plate: ' + plateNum)
                         print('Owner name: '+ licensePlate[foundLocation]['name'])
                         print('Region: '+licensePlate[foundLocation]['region'])
 
